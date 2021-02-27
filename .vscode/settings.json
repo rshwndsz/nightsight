@@ -1,0 +1,9 @@
+{
+    "editor.wordWrap": "on",
+    "editor.rulers": [
+        80,
+        120
+    ],
+    "python.formatting.provider": "yapf",
+
+}
