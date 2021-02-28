@@ -9,7 +9,8 @@ from albumentations.pytorch import ToTensorV2
 import pytest
 from nightsight import data
 
-class TestZeroDceDS:
+
+class TestGenericImageDS:
     tf = A.Compose([
         A.Resize(256, 256, interpolation=4, p=1),
         A.Normalize(mean=(0.0, 0.0, 0.0), std=(1.0, 1.0, 1.0)),
@@ -18,8 +19,7 @@ class TestZeroDceDS:
 
     root = "data/train_data"
     extn = "*.jpg"
-    ds = data.ZeroDceDS(root, extn, train=True, transform=tf)
-    dl = D.DataLoader(ds, batch_size=4, pin_memory=False, shuffle=False)
+    ds = data.GenericImageDS(root, extn, train=True, transform=tf)
 
     def test_image_collection(self):
         nimages = len(glob.glob(os.path.join(self.root, self.extn)))
