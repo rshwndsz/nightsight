@@ -8,8 +8,10 @@ from torch.utils import data as D
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-from nightsight.log import logger
+from nightsight.log import Logger
 from nightsight import utils
+
+logger = Logger()
 
 
 class ZeroDceDS(D.Dataset):
@@ -359,33 +361,3 @@ class LIME(D.Dataset):
 
     def __getitem__(self, index):
         pass
-
-
-if __name__ == "__main__":
-    # TODO Move these to tests/
-
-    # Test the dataset API
-    train_transform = A.Compose([
-        A.VerticalFlip(p=0.1),
-        A.HorizontalFlip(p=0.6),
-        A.ShiftScaleRotate(shift_limit=0.05,
-                        scale_limit=0.05,
-                        rotate_limit=15,
-                        p=1),
-        A.Resize(256, 256, interpolation=INTER_LANCZOS4, p=1),
-        A.ISONoise(color_shift=(0.01, 0.05), intensity=(0.1, 0.5), p=1),
-        A.MotionBlur(p=1),
-        A.RandomBrightnessContrast(p=1),
-        A.Normalize(mean=(0.0, 0.0, 0.0), std=(1.0, 1.0, 1.0), p=1),
-        ToTensorV2(),
-    ])
-
-    ds = ZeroDceDS("data/train_data/",
-                "*.jpg",
-                train=True,
-                transform=train_transform)
-    dl = D.DataLoader(ds, batch_size=8, pin_memory=False, shuffle=False)
-    batch = next(iter(dl))
-    plt.imshow(batch[3].permute(1, 2, 0))
-    plt.show()
-    logger.debug(f"{batch[3].max(), batch[3].min()}")
