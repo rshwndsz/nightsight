@@ -13,6 +13,16 @@ logger = Logger()
 IMAGE_SIZE = (256, 256)
 
 
+def patchify(img, patch_shape):
+    """
+    References:
+    https://stackoverflow.com/a/16788733
+    https://stackoverflow.com/a/47581978
+    https://stackoverflow.com/a/41850409
+    """
+    pass
+
+
 def inference(args):
     # Load state dict from local disk
     checkpoint = torch.load(args.weights)
@@ -26,7 +36,7 @@ def inference(args):
     for image_path in args.images:
         # TODO Split image into patches, compute enhaced parallely and average
         # Load
-        image = cv2.imread(image_path)
+        image = cv2.cvtColor(cv2.imread(image_path), cv2.COLOR_BGR2RGB)
         # Resize
         image = cv2.resize(image, IMAGE_SIZE)
         # Tensorify and convert to [C H W]
