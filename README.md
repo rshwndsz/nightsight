@@ -7,5 +7,24 @@
 ```bash
 git clone https://github.com/rshwndsz/nightsight
 cd nightsight
+```
+
+Create a virtual environment.
+
+```bash
+python3 -m venv ./env
+source ./env/bin/activate
+pip3 install --upgrade pip
+```
+
+Install.
+
+```bash
 ./scripts/setup.sh
+```
+
+Use the following for training
+
+```bash
+./scripts/setup.sh "training"
 ```
