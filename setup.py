@@ -34,5 +34,9 @@ setup(
         'matplotlib',
         'pillow',
     ],
+    extras_require={
+        # Use pip install -e .[training]
+        'training': ['albumentations', 'matplotlib', 'tqdm'],
+    }
     tests_require=['pytest'],
 )
