@@ -4,6 +4,7 @@ import torchvision as tv
 from tqdm import tqdm
 from pathlib import Path
 from zipfile import ZipFile
+import tarfile
 import os
 import requests
 
@@ -54,14 +55,17 @@ def download_file(url, destination_dir='./', desc=None, force=False):
                 pbar.update(len(data))
                 f.write(data)
         pbar.close()
+
+    # TODO Add SHA256 or MD5 comparison
+
     return local_filepath
 
 
 def extract_file(fname,
-                 ftype=None,
                  destination_dir="./",
+                 ftype=None,
                  desc=None,
-                 remove_extract=False):
+                 remove_extract=True):
     # Convert to pathlib objects
     fname = Path(fname)
     destination_dir = Path(destination_dir)
@@ -78,30 +82,30 @@ def extract_file(fname,
 
     # Get type of extract
     if ftype is None:
-        ftype = fname.suffix
+        # Takes care of '<name>.tar.gz'
+        ftype = ''.join(fname.suffixes)
 
     # Extract the dataset into `destination_dir`
     if ftype == '.tar':
+        # https://stackoverflow.com/a/30888321
         with tarfile.open(fname) as tar:
-            pbar = tqdm(iterable=tar.getmembers(),
-                        total=len(tar.getmembers()),
-                        desc=desc)
-            # Extract files with progress bar - https://stackoverflow.com/a/53405055
-            for member in pbar:
-                tar.extract(member=member, path=destination_dir)
+            tar.extractall(path=destination_dir)
+
+    elif ftype == '.tgz' or ftype == '.tar.gz':
+        # https://stackoverflow.com/a/30888321
+        with tarfile.open(fname) as tar:
+            tar.extractall(path=destination_dir)
 
     elif ftype == '.zip':
         # https://stackoverflow.com/a/56970565
         with ZipFile(fname, 'r') as zip:
-            pbar = tqdm(zip.infolist(), desc=desc)
-            for member in pbar:
-                zip.extract(member, destination_dir)
+            zip.extractall(path=destination_dir)
 
     else:
         raise IOError(f"The suffix: {ftype} is not supported.")
 
+    # Delete the compressed dataset if requested (by default: yes)
     if remove_extract:
-        # Delete the compressed dataset
         os.remove(fname)
 
 
