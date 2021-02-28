@@ -33,6 +33,7 @@ setup(
         'numpy',
         'matplotlib',
         'pillow',
+        'pytest'
     ],
     extras_require={
         # Use pip install -e .[training]
