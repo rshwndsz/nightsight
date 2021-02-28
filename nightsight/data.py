@@ -51,12 +51,6 @@ class GenericImageDS(D.Dataset):
         if urls is None:
             raise ValueError("Provide URL(s)")
 
-        # Basic check to see if already downloaded
-        if destination_dir.is_dir() and not force:
-            logger.warning(f"Destination directory exists. \
-                Use force=True to re-download.")
-            return
-
         # Download & Extract
         for url in urls:
             fname = utils.download_file(url, destination_dir)

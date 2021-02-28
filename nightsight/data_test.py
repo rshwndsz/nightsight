@@ -1,253 +1,49 @@
 import os
 import glob
+import pytest
+
 import numpy as np
 import torch
 from torch.utils import data as D
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-import pytest
 from nightsight import data
 
 
-class TestGenericImageDS:
+# See https://stackoverflow.com/a/63425096
+@pytest.fixture(scope="session")
+def prepare_BSDS300(tmp_path_factory):
+    urls = ["https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/BSDS300-images.tgz"]
+    destination_dir = tmp_path_factory.getbasetemp()
+    data.GenericImageDS.download(urls, destination_dir)
+
+    root = os.path.join(destination_dir, "BSDS300", "images", "train")
+    image_glob = "*.jpg"
     tf = A.Compose([
         A.Resize(256, 256, interpolation=4, p=1),
         A.Normalize(mean=(0.0, 0.0, 0.0), std=(1.0, 1.0, 1.0)),
         ToTensorV2()
     ])
+    ds = data.GenericImageDS(root, image_glob, train=True, transform=tf)
+    return [ root, image_glob, tf, ds ]
 
-    root = "data/train_data"
-    extn = "*.jpg"
-    ds = data.GenericImageDS(root, extn, train=True, transform=tf)
 
-    def test_image_collection(self):
-        nimages = len(glob.glob(os.path.join(self.root, self.extn)))
-        assert len(self.ds) == nimages
+@pytest.mark.slow
+class TestBSDS300:
+    def test_image_collection(self, prepare_BSDS300):
+        root, image_glob, _, ds = prepare_BSDS300
+        print(root, image_glob)
+        nimages = len(glob.glob(os.path.join(root, image_glob)))
+        assert len(ds) == nimages
 
-    @pytest.mark.slow
-    def test_output_size(self):
-        for image in self.ds:
+    def test_output_size(self, prepare_BSDS300):
+        _, _, _, ds = prepare_BSDS300
+        for image in ds:
             assert tuple(image.shape) == (3, 256, 256)
 
-    @pytest.mark.slow
-    def test_output_range(self):
-        for image in self.ds:
-            assert torch.le(torch.max(image), torch.Tensor([1.0]))
-            assert torch.ge(torch.min(image), torch.Tensor([0.0]))
-
-
-@pytest.mark.skip(reason="Tired")
-class TestGoogleOpenImagesDS:
-    @pytest.mark.slow
-    def test_download(self):
-        pass
-
-    def test_image_collection(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_size(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_range(self):
-        pass
-
-
-@pytest.mark.skip(reason="Tired")
-class TestBSDS300:
-    @pytest.mark.slow
-    def test_download(self):
-        pass
-
-    def test_image_collection(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_size(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_range(self):
-        pass
-
-
-@pytest.mark.skip(reason="Tired")
-class TestGoogleOpenImagesDS:
-    @pytest.mark.slow
-    def test_download(self):
-        pass
-
-    def test_image_collection(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_size(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_range(self):
-        pass
-
-
-@pytest.mark.skip(reason="WIP")
-class TestSIDD:
-    @pytest.mark.slow
-    def test_download(self):
-        pass
-
-    def test_image_collection(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_size(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_range(self):
-        pass
-
-
-@pytest.mark.skip(reason="WIP")
-class TestDarmstadtNoise:
-    @pytest.mark.slow
-    def test_download(self):
-        pass
-
-    def test_image_collection(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_size(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_range(self):
-        pass
-
-
-@pytest.mark.skip(reason="WIP")
-class TestLOL:
-    @pytest.mark.slow
-    def test_download(self):
-        pass
-
-    def test_image_collection(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_size(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_range(self):
-        pass
-
-
-@pytest.mark.skip(reason="WIP")
-class TestExDark:
-    @pytest.mark.slow
-    def test_download(self):
-        pass
-
-    def test_image_collection(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_size(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_range(self):
-        pass
-
-
-@pytest.mark.skip(reason="WIP")
-class TestVV:
-    @pytest.mark.slow
-    def test_download(self):
-        pass
-
-    def test_image_collection(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_size(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_range(self):
-        pass
-
-
-@pytest.mark.skip(reason="WIP")
-class TestVIPLowNoise:
-    @pytest.mark.slow
-    def test_download(self):
-        pass
-
-    def test_image_collection(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_size(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_range(self):
-        pass
-
-
-@pytest.mark.skip(reason="WIP")
-class TestDICM:
-    @pytest.mark.slow
-    def test_download(self):
-        pass
-
-    def test_image_collection(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_size(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_range(self):
-        pass
-
-
-@pytest.mark.skip(reason="WIP")
-class TestDICM:
-    @pytest.mark.slow
-    def test_download(self):
-        pass
-
-    def test_image_collection(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_size(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_range(self):
-        pass
-
-
-@pytest.mark.skip(reason="WIP")
-class TestLIME:
-    @pytest.mark.slow
-    def test_download(self):
-        pass
-
-    def test_image_collection(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_size(self):
-        pass
-
-    @pytest.mark.slow
-    def test_output_range(self):
-        pass
+    def test_output_range(self, prepare_BSDS300):
+        _, _, _, ds = prepare_BSDS300
+        for image in ds:
+            assert torch.le(torch.max(image), torch.tensor([1.0]))
+            assert torch.ge(torch.min(image), torch.tensor([0.0]))
