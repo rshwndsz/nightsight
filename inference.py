@@ -1,7 +1,7 @@
 import argparse
 import torch
 import numpy as np
-from PIL import Image
+import cv2
 from torchvision.utils import save_image
 from pathlib import Path
 
@@ -26,11 +26,11 @@ def inference(args):
     for image_path in args.images:
         # TODO Split image into patches, compute enhaced parallely and average
         # Load
-        image = Image.open(image_path)
+        image = cv2.imread(image_path)
         # Resize
-        image = image.resize(IMAGE_SIZE)
+        image = cv2.resize(image, IMAGE_SIZE)
         # Tensorify and convert to [C H W]
-        image = torch.from_numpy(np.array(image)).permute(2, 0, 1)
+        image = torch.from_numpy(image).permute(2, 0, 1)
         # Normalize
         image = torch.div(image, torch.Tensor([255.0]))
         # Convert to [N C H W]
@@ -39,7 +39,9 @@ def inference(args):
         ei_1, ei, A = net(image)
         ei = ei.detach()[0] # Convert from [1 C H W] to [C H W]
         # Unnormalize
-        ei = torch.clamp(ei * torch.Tensor([255]), 0, 255)
+        # TODO See when this is required/not
+        # ei = torch.clamp(ei * torch.Tensor([255]), 0, 255)
+        logger.debug(f"ei: {ei.min()} -> {ei.max()}")
         # Save
         save_image(ei, Path(args.outdir) / image_path.split('/')[-1])
 
