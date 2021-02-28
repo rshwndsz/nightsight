@@ -10,7 +10,7 @@ LOGGING_CONFIG = {
         },
     },
     'handlers': {
-        'default': {
+        'stdout': {
             'level': 'DEBUG',
             'formatter': 'standard',
             'class': 'logging.StreamHandler',
@@ -28,28 +28,18 @@ LOGGING_CONFIG = {
     },
     'loggers': {
         '': {  # root logger
-            'handlers': ['default'],
-            'level': 'INFO',
-            'propagate': False
-        },
-        'nightsight': {
-            'handlers': ['default', 'file'],
+            'handlers': ['stdout', 'file'],
             'level': 'DEBUG',
-            'propagate': False
-        },
-        '__main__': {  # if __name__ == '__main__'
-            'handlers': ['default'],
-            'level': 'INFO',
-            'propagate': False
+            'propagate': True
         },
     }
 }
 
 
 class Logger:
-    def __init__(self, name='nightsight'):
+    def __init__(self):
         dictConfig(LOGGING_CONFIG)
-        self.logger = logging.getLogger(name)
+        self.logger = logging.getLogger()
 
     def info(self, message, *args, **kwargs):
         self.logger.info(message, *args, **kwargs)
