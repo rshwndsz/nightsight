@@ -1,5 +1,6 @@
 from distutils.core import setup
 
+# TODO Complete
 setup(
     name='nightsight',
     version='0.1.0',
