@@ -1,5 +1,5 @@
-import torch
 import pytest
+import torch
 from nightsight import loss
 
 
@@ -25,12 +25,11 @@ def test_LColorLoss():
     assert (not torch.isnan(loss_col))
 
 
-@pytest.mark.skip(reason="WIP")
 def test_LTVLoss():
-    A = torch.rand(24, 3, 256, 256)
+    A = torch.rand(4, 24, 256, 256)
     L_tv = loss.LTVLoss()
     loss_tv = L_tv(A)
-    assert (not torch.isnan(loss_col))
+    assert (not torch.isnan(loss_tv))
 
 
 @pytest.mark.skip(reason="Not used")
