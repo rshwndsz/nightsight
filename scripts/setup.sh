@@ -9,3 +9,5 @@ if [[ $1 -eq "training" ]]; then
 else
     pip install -e .
 fi
+
+source ./env/bin/activate
