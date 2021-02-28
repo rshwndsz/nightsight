@@ -1,55 +1,53 @@
 import argparse
-import albumentations as A
-from albumentations.pytorch import ToTensorV2
+import torch
+import numpy as np
+from PIL import Image
+from torchvision.utils import save_image
+from pathlib import Path
 
 from nightsight import model
 from nightsight import data
-# TODO Remove hparams dependency - Global var?
-from train import hparams
+from nightsight.log import Logger
+logger = Logger()
+
+IMAGE_SIZE = (256, 256)
 
 
-def test(args):
-    net = model.FinalNet.load_from_checkpoint(checkpoint_path=weights_path)
+def inference(args):
+    # Load state dict from local disk
+    checkpoint = torch.load(args.weights)
+    # Get model
+    net = model.EnhanceNetNoPool()
+    # Load state dict into model
+    net.load_state_dict(checkpoint)
+    # Toggle eval mode to avoid gradient computation
     net.eval()
 
-    tf = A.Compose([
-        A.Resize(hparams['image_size'],
-                 hparams['image_size'],
-                 interpolation=4,
-                 p=1),
-        A.Normalize(mean=(0.0, 0.0, 0.0), std=(1.0, 1.0, 1.0), p=1),
-        ToTensorV2(),
-    ])
-
-    ds = ZeroDceDS(args.data_path,
-                   args.data_glob,
-                   train=False,
-                   transform=test_transform)
-    dl = D.DataLoader(ds, batch_size=5, pin_memory=False, shuffle=True)
-    batch = next(iter(dl))
-    plt.imshow(batch[0].permute(1, 2, 0))
-
-    results_1, results, results_A = testing_model(batch)
-
-    display = torch.cat([batch, results]).detach()
-    display = torch.clamp(display * torch.Tensor([255]).type_as(results), 0,
-                          255)
-    if plot:
-        display = tv.utils.make_grid(display,
-                                     nrow=display.size()[0] // 2,
-                                     padding=2,
-                                     normalize=False)
-        image = display.detach().permute(1, 2, 0).cpu().numpy()
-        fig, ax = plt.subplots(1, 1, figsize=(20, 20))
-        ax.imshow(image)
-        plt.show()
+    for image_path in args.images:
+        # TODO Split image into patches, compute enhaced parallely and average
+        # Load
+        image = Image.open(image_path)
+        # Resize
+        image = image.resize(IMAGE_SIZE)
+        # Tensorify and convert to [C H W]
+        image = torch.from_numpy(np.array(image)).permute(2, 0, 1)
+        # Normalize
+        image = torch.div(image, torch.Tensor([255.0]))
+        # Convert to [N C H W]
+        image = image.unsqueeze(0)
+        # Enhance
+        ei_1, ei, A = net(image)
+        ei = ei.detach()[0] # Convert from [1 C H W] to [C H W]
+        # Unnormalize
+        ei = torch.clamp(ei * torch.Tensor([255]), 0, 255)
+        # Save
+        save_image(ei, Path(args.outdir) / image_path.split('/')[-1])
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("weights_path")
-    parser.add_argument("data_path")
-    parser.add_argument("data_glob")
-    parser.add_argument("plot", type=bool)
+    parser.add_argument("-w", "--weights", required=True)
+    parser.add_argument("-i", "--images", nargs='+', required=True)
+    parser.add_argument("-o", "--outdir", default="./data/output/")
     args = parser.parse_args()
-    test(args)
+    inference(args)
