@@ -1,7 +1,7 @@
 import argparse
 import torch
 import numpy as np
-import cv2
+from PIL import Image
 from torchvision.utils import save_image
 from pathlib import Path
 
@@ -11,16 +11,6 @@ from nightsight.log import Logger
 logger = Logger()
 
 IMAGE_SIZE = (256, 256)
-
-
-def patchify(img, patch_shape):
-    """
-    References:
-    https://stackoverflow.com/a/16788733
-    https://stackoverflow.com/a/47581978
-    https://stackoverflow.com/a/41850409
-    """
-    pass
 
 
 def inference(args):
@@ -36,11 +26,11 @@ def inference(args):
     for image_path in args.images:
         # TODO Split image into patches, compute enhaced parallely and average
         # Load
-        image = cv2.cvtColor(cv2.imread(image_path), cv2.COLOR_BGR2RGB)
+        image = Image.open(image_path)
         # Resize
-        image = cv2.resize(image, IMAGE_SIZE)
+        image = image.resize(IMAGE_SIZE)
         # Tensorify and convert to [C H W]
-        image = torch.from_numpy(image).permute(2, 0, 1)
+        image = torch.from_numpy(np.array(image)).permute(2, 0, 1)
         # Normalize
         image = torch.div(image, torch.Tensor([255.0]))
         # Convert to [N C H W]
