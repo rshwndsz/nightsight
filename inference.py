@@ -6,7 +6,6 @@ from torchvision.utils import save_image
 from pathlib import Path
 
 from nightsight import model
-from nightsight import data
 from nightsight.log import Logger
 logger = Logger()
 
