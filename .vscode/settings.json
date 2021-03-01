@@ -5,6 +5,12 @@
         120
     ],
     "python.formatting.provider": "yapf",
-    "python.pythonPath": "/Users/Russel/myProjects/college/nightsight/env/bin/python3",
+    "python.pythonPath": "/Users/Russel/myProjects/college/nightsight/.env/bin/python3",
+    "files.exclude": {
+        ".git": true,
+        ".env": true,
+        ".pytest_cache": true,
+        "*.egg-info/": true,
+    },
 
 }
