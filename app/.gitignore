@@ -31,7 +31,6 @@
 *.out
 *.app
 
-# Ignore include as include/ on Dev machine (Mac)
-# is different from include/ on Prod machine (RPi)
-include/
+# Install your own libtorch
+libtorch/
 
