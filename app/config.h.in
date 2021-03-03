@@ -1,0 +1,5 @@
+#pragma once
+
+#define Nightsight_VERSION_MAJOR @Nightsight_VERSION_MAJOR@
+#define Nightsight_VERSION_MINOR @Nightsight_VERSION_MINOR@
+#define Nightsight_VERSION_PATCH @Nightsight_VERSION_PATCH@

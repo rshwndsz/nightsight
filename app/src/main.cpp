@@ -2,16 +2,11 @@
 // TODO Description
 
 // User includes
-/* #include "NightsightConfig.h" */
+#include "config.h"
 #include <torch/script.h>
-/* #define STB_IMAGE_IMPLEMENTATION */
-/* #include "stb/stb_image.h" */
-/* #include "stb/stb_image_resize.h" */
-/* #include "stb/stb_image_write.h" */
-// C header files
-#include <stdint.h>
+
 #include <stdlib.h>
-// C++ header files
+
 #include <iostream>
 #include <memory>
 #include <tuple>
@@ -20,8 +15,8 @@ int main(int argc, const char *argv[]) {
   // Check usage
   if (argc != 3) {
     // Report version
-    /* std::cout << argv[0] << " Version " << Nightsight_VERSION_MAJOR << "." */
-    /*           << Nightsight_VERSION_MINOR << std::endl; */
+    std::cout << argv[0] << " Version " << Nightsight_VERSION_MAJOR << "."
+                 << Nightsight_VERSION_MINOR << std::endl;
     std::cerr << "Usage: " << argv[0]
               << " <path-to-exported-script-module> <path-to-original-image>\n";
     exit(EXIT_FAILURE);
