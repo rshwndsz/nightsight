@@ -5,6 +5,6 @@ project(nightsight)
 find_package(Torch REQUIRED)
 
 add_executable(nightsight inference.cpp)
-target_link_libraries(nightsight "${TORCH_LIBRARIES}")
+target_link_libraries(nightsight ${TORCH_LIBRARIES})
 set_property(TARGET nightsight PROPERTY CXX_STANDARD 14)
 
