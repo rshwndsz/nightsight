@@ -27,7 +27,7 @@ LOGGING_CONFIG = {
         }
     },
     'loggers': {
-        '': {  # root logger
+        'nightsight': {  # root logger
             'handlers': ['stdout', 'file'],
             'level': 'DEBUG',
             'propagate': True
@@ -39,7 +39,7 @@ LOGGING_CONFIG = {
 class Logger:
     def __init__(self):
         dictConfig(LOGGING_CONFIG)
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger('nightsight')
 
     def info(self, message, *args, **kwargs):
         self.logger.info(message, *args, **kwargs)
