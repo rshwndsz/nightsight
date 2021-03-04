@@ -6,7 +6,7 @@ LOGGING_CONFIG = {
     'disable_existing_loggers': True,
     'formatters': {
         'standard': {
-            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+            'format': '%(asctime)s %(filename)9s: %(levelname)8s %(message)s'
         },
     },
     'handlers': {
@@ -27,7 +27,7 @@ LOGGING_CONFIG = {
         }
     },
     'loggers': {
-        '': {  # root logger
+        'nightsight': {
             'handlers': ['stdout', 'file'],
             'level': 'DEBUG',
             'propagate': True
@@ -39,19 +39,22 @@ LOGGING_CONFIG = {
 class Logger:
     def __init__(self):
         dictConfig(LOGGING_CONFIG)
-        self.logger = logging.getLogger()
+        self._logger = logging.getLogger('nightsight')
+
+    def setLevel(self, level):
+        self._logger.setLevel(level)
 
     def info(self, message, *args, **kwargs):
-        self.logger.info(message, *args, **kwargs)
+        self._logger.info(message, *args, **kwargs)
 
     def debug(self, message, *args, **kwargs):
-        self.logger.debug(message, *args, **kwargs)
+        self._logger.debug(message, *args, **kwargs)
 
     def warning(self, message, *args, **kwargs):
-        self.logger.warning(message, *args, **kwargs)
+        self._logger.warning(message, *args, **kwargs)
 
     def error(self, message, *args, **kwargs):
-        self.logger.error(message, *args, **kwargs)
+        self._logger.error(message, *args, **kwargs)
 
     def critical(self, message, *args, **kwargs):
-        self.logger.critical(message, *args, **kwargs)
+        self._logger.critical(message, *args, **kwargs)
