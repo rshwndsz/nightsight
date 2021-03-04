@@ -59,5 +59,5 @@ if __name__ == "__main__":
     parser.set_defaults(verbose=False)
     args = parser.parse_args()
     if not args.verbose:
-        logger.logger.setLevel(logging.INFO)
+        logger.setLevel(logging.INFO)
     inference(args)
