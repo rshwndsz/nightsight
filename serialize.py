@@ -1,17 +1,21 @@
+#!/usr/bin/env python3
 import torch
 from nightsight import model
 
+# Load checkpoint
+checkpoint = torch.load("checkpoints/state_dict--epoch=30.ckpt")
 
-if __name__ == "__main__":
-    # An instance of your model.
-    net = model.EnhanceNetNoPool()
+# An instance of your model.
+net = model.EnhanceNetNoPool()
 
-    # An example input you would normally provide to your model's forward() method.
-    example = torch.rand(1, 3, 256, 256)
+# Load weights
+net.load_state_dict(checkpoint)
 
-    # Use torch.jit.trace to generate a torch.jit.ScriptModule via tracing.
-    traced_script_module = torch.jit.trace(net, example)
+# An example input you would normally provide to your model's forward() method.
+example = torch.rand(1, 3, 256, 256)
 
-    # Serialising script module to a file
-    traced_script_module.save("traced_EnhanceNetNoPool.pt")
+# Use torch.jit.trace to generate a torch.jit.ScriptModule via tracing.
+traced_script_module = torch.jit.trace(net, example)
 
+# Serialising script module to a file
+traced_script_module.save("traced_EnhanceNetNoPool.pt")
