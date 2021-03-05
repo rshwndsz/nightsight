@@ -91,7 +91,7 @@ int main(int argc, const char *argv[]) {
                                   .div_(255.0)
                                   .permute({2, 0, 1})
                                   .unsqueeze(0);
-  std::cout << " - done ";
+  std::cout << " - done\n";
 
   // Create a Vector of inputs
   std::cout << "Enhancing input";
