@@ -14,13 +14,14 @@
 
 int main(int argc, const char *argv[]) {
   // Check usage
-  if (argc != 3) {
+  if (argc != 4) {
     // Report version
     std::cout << argv[0] << " Version " << Nightsight_VERSION_MAJOR << "."
               << Nightsight_VERSION_MINOR << std::endl;
     // Report usage
     std::cerr << "Usage: " << argv[0]
-              << " <path-to-exported-script-module> <path-to-original-image>\n";
+              << " <path-to-exported-script-module> <path-to-original-image> "
+              << "<path-to-new-image>\n";
     exit(EXIT_FAILURE);
   }
 
@@ -122,7 +123,7 @@ int main(int argc, const char *argv[]) {
   // Write image
   std::cout << "Writing output to file";
   // See: https://stackoverflow.com/a/40812978
-  int write_status = stbi_write_jpg(/*filename*/ "output.jpg",
+  int write_status = stbi_write_jpg(/*filename*/ argv[3],
                                     /*width*/ width,
                                     /*height*/ height,
                                     /*NUM_CHANNELS*/ 3,
