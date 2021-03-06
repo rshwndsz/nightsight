@@ -1,4 +1,14 @@
-// Inference.cpp
+/* Nightsight in C++
+
+   Usage
+   -----
+   (from the root directory)
+   ./app/build/nightsight     \
+       <path-to-traced-model> \
+       <path-to-input-image>  \
+       <path-to-output-image>
+*/
+
 #include "config.h"
 #include <iostream>
 #include <memory>
@@ -41,7 +51,7 @@ int main(int argc, const char *argv[]) {
   // https://stackoverflow.com/a/40812978
   int width, height, ch;
   unsigned char *image;
-  std::cout << "Loading model";
+  std::cout << "Loading image";
   image = stbi_load(/*filename*/ argv[2],
                     /*input_width*/ &width,
                     /*input_height*/ &height,
@@ -54,36 +64,39 @@ int main(int argc, const char *argv[]) {
   std::cout << " - done\n";
 
   // Resize image
-  // std::cout << "Allocating memory for resized image";
-  // unsigned char *resized;
-  // resized = (unsigned char *)malloc(256 * 256 * ch);
-  // if (!resized) {
-  //   std::cout << " - failed\n";
-  //   exit(EXIT_FAILURE);
-  // }
-  // std::cout << " - done\n";
-  // std::cout << "Resizing image";
-  // int resize_status = stbir_resize_uint8(/*input_data*/ image,
-  //                                        /*input_width*/ width,
-  //                                        /*input_height*/ height,
-  //                                        /*input_stride_in_bytes*/ 0,
-  //                                        /*ouput_data*/ resized,
-  //                                        /*output_width*/ 256,
-  //                                        /*output_height*/ 256,
-  //                                        /*output_stride_in_bytes*/ 0,
-  //                                        /*NUM_CHANNELS*/ ch);
-  // if (!resize_status) {
-  //   std::cerr << " - failed\n";
-  //   exit(EXIT_FAILURE);
-  // } else {
-  //   std::cout << " - done\n";
-  // }
+  std::cout << "Allocating memory for resized image";
+  unsigned char *resized;
+  resized = (unsigned char *)malloc(256 * 256 * ch);
+  if (!resized) {
+    std::cout << " - failed\n";
+    exit(EXIT_FAILURE);
+  }
+  std::cout << " - done\n";
+  std::cout << "Resizing image";
+  int resize_status = stbir_resize_uint8(/*input_data*/ image,
+                                         /*input_width*/ width,
+                                         /*input_height*/ height,
+                                         /*input_stride_in_bytes*/ 0,
+                                         /*ouput_data*/ resized,
+                                         /*output_width*/ 256,
+                                         /*output_height*/ 256,
+                                         /*output_stride_in_bytes*/ 0,
+                                         /*NUM_CHANNELS*/ ch);
+  if (!resize_status) {
+    std::cerr << " - failed\n";
+    exit(EXIT_FAILURE);
+  } else {
+    width = 256;
+    height = 256;
+    ch = ch;
+    std::cout << " - done\n";
+  }
 
   // Convert image to Tensor
   // https://stackoverflow.com/a/63154900
   // https://github.com/pytorch/pytorch/issues/12506
   std::cout << "Converting input to tensor";
-  torch::Tensor imageTensor = torch::from_blob(/*Pure c++ matrix data*/ image,
+  torch::Tensor imageTensor = torch::from_blob(/*Pure c++ matrix data*/ resized,
                                                /*dims*/ {width, height, ch},
                                                /*dtype*/ torch::kUInt8)
                                   .clone()
@@ -126,7 +139,7 @@ int main(int argc, const char *argv[]) {
   int write_status = stbi_write_jpg(/*filename*/ argv[3],
                                     /*width*/ width,
                                     /*height*/ height,
-                                    /*NUM_CHANNELS*/ 3,
+                                    /*NUM_CHANNELS*/ ch,
                                     /*Matrix*/ output,
                                     /*Quality*/ width * 3);
   if (!write_status) {
