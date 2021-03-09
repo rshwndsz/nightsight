@@ -13,7 +13,7 @@ include(GNUInstallDirs)
 find_package(Torch
     REQUIRED
     PATHS
-        ${PROJECT_SOURCE_DIR}/include/libtorch
+        ${PROJECT_SOURCE_DIR}/include/external/libtorch
 )
 
 # Pass version number to source code
@@ -29,6 +29,7 @@ target_include_directories(nightsight
     PRIVATE
         ${PROJECT_SOURCE_DIR}/include
     PUBLIC
+        ${PROJECT_SOURCE_DIR}/include/external
         ${PROJECT_BINARY_DIR}
 )
 

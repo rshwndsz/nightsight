@@ -31,6 +31,6 @@
 *.out
 *.app
 
-# Install your own libtorch
-libtorch/
+# Install your own libtorch and stb
+external/
 
