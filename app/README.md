@@ -2,6 +2,8 @@
 
 Download LibTorch from [pytorch.org](https://pytorch.org) and place the unzipped folder in `nightsight/app/include`.
 
+Download the files `stb_image.h`, `stb_image_resize.h` and `stb_image_write.h` from [github.com/nothings/stb](https://github.com/nothings/stb)
+
 Serialize the model by running the following in `nightsight/app/`
 ```bash
 python serialize.py
