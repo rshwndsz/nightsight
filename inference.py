@@ -51,7 +51,7 @@ def patchify(image, split_size, overlap):
 
 
 def reconstruct(splits, split_size, overlap, image_size, X_points, Y_points):
-    logger.debug(f"Reconstructing image of shape {image_size}")
+    logger.info(f"Reconstructing image of shape {image_size}")
     result = torch.zeros(image_size, dtype=torch.float)
 
     count = 0
@@ -66,20 +66,20 @@ def _inference(net, inp, patch_size, csize):
     if type(inp) == str: 
         image_path = inp
         # Path to ndarray
-        logger.debug(f"Loading ndarray from {image_path}")
+        logger.info(f"Loading ndarray from {image_path}")
         try:
             image = np.load(image_path)
         except (ValueError, IOError):
             image = None
-            logger.debug(f"{image_path} could'nt be opened with numpy.")
+            logger.info(f"{image_path} could'nt be opened with numpy.")
 
         # Path to image
-        logger.debug(f"Loading image from {image_path}")
+        logger.info(f"Loading image from {image_path}")
         try:
             image = np.asarray(Image.open(image_path))
         except (ValueError, IOError):
             image = None
-            logger.debug(f"{image_path} couldn't be opened with PIL.")
+            logger.info(f"{image_path} couldn't be opened with PIL.")
 
         # Unsuccessful reading using both PIL and numpy
         if image is None:
@@ -97,21 +97,21 @@ def _inference(net, inp, patch_size, csize):
     if image.shape[0] > patch_size * 2 or image.shape[1] > patch_size * 2:
         original_shape = image.shape
         # Split image into multiple patches
-        logger.debug(f"Splitting image of shape {image.shape}..")
+        logger.info(f"Splitting image of shape {image.shape}..")
         image, X_points, Y_points = patchify(image, patch_size, 1/8.0)
-        logger.debug(f"Split into {image.shape[0]} patches.")
+        logger.info(f"Split into {image.shape[0]} patches.")
     else:
         # Add a dummy dimension
         image = np.expand_dims(image, 0)
 
     # Tensorify and convert to [N C H W] from [N H W C]
-    logger.debug("Converting to tensor...")
+    logger.info("Converting to tensor...")
     image = torch.from_numpy(image).permute(0, 3, 1, 2)
     # Normalize
     image = torch.div(image, torch.Tensor([255.0]))
 
     # Enhance
-    logger.debug("Enhancing image...")
+    logger.info("Enhancing image...")
     if image.size(0) > csize:
         # Get batch numbers
         cnos = [0]
@@ -122,7 +122,7 @@ def _inference(net, inp, patch_size, csize):
         # Cycle through batches of 8
         ei = []
         for i in range(len(cnos)-1):
-            logger.debug(f"Enhancing image[{cnos[i]}:{cnos[i+1]}]")
+            logger.info(f"Enhancing image[{cnos[i]}:{cnos[i+1]}]")
             _, _ei, _ = net(image[cnos[i]:cnos[i+1]])
             ei.append(_ei.detach())
         ei = torch.cat(ei, dim=0)
@@ -134,7 +134,7 @@ def _inference(net, inp, patch_size, csize):
     # Unnormalize
     # TODO See when this is required/not
     # ei = torch.clamp(ei * torch.Tensor([255]), 0, 255)
-    # logger.debug(f"ei: {ei.min()} -> {ei.max()}")
+    # logger.info(f"ei: {ei.min()} -> {ei.max()}")
 
     if ei.size(0) == 1:
         result = ei.squeeze(0)
@@ -150,7 +150,7 @@ def inference(weights, images, patch_size, cycle_size, outdir):
     if type(images) != list:
         images = [images]
 
-    logger.debug("Loading weights...")
+    logger.info("Loading weights...")
     # Load state dict from local disk
     checkpoint = torch.load(weights)
     # Get model
@@ -166,12 +166,12 @@ def inference(weights, images, patch_size, cycle_size, outdir):
 
     if outdir is not None:
         for (ei, image_path) in results:
-            logger.debug(f"Saving image {ei.shape}")
+            logger.info(f"Saving image {ei.shape}")
             # Save image into `outdir`
             Path(outdir).mkdir(parents=True, exist_ok=True)
             output_name = Path(outdir) / (image_path.split('/')[-1])
             save_image(ei, output_name)
-            logger.debug(f"Saved {output_name}")
+            logger.info(f"Saved {output_name}")
     return results
 
 
