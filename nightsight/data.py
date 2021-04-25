@@ -9,9 +9,7 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
 from nightsight import utils
-from nightsight.log import Logger
-logger = Logger()
-
+logger = logging.getLogger(__name__)
 
 class GenericImageDS(D.Dataset):
     def __init__(self,
@@ -123,3 +121,4 @@ class BSDS500(GenericImageDS):
     URL: http://www.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/BSR/BSR_bsds500.tgz
     """
     pass
+
