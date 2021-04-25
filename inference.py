@@ -9,8 +9,8 @@ import torch
 from torchvision.utils import save_image
 
 from nightsight import model
-from nightsight.log import Logger
-logger = Logger()
+from nightsight.log import initLogger
+logger = logging.getLogger(__name__)
 
 
 def generateRandomString(length):
@@ -62,7 +62,7 @@ def reconstruct(splits, split_size, overlap, image_size, X_points, Y_points):
     return result
 
 
-def _inference(net, inp, image_size):
+def _inference(net, inp, patch_size, csize):
     if type(inp) == str: 
         image_path = inp
         # Path to ndarray
@@ -94,11 +94,11 @@ def _inference(net, inp, image_size):
         raise ValueError("Invalid input.")
 
     # Split/Resize
-    if image.shape[0] > image_size * 2 or image.shape[1] > image_size * 2:
+    if image.shape[0] > patch_size * 2 or image.shape[1] > patch_size * 2:
         original_shape = image.shape
         # Split image into multiple patches
         logger.debug(f"Splitting image of shape {image.shape}..")
-        image, X_points, Y_points = patchify(image, image_size, 1/8.0)
+        image, X_points, Y_points = patchify(image, patch_size, 1/8.0)
         logger.debug(f"Split into {image.shape[0]} patches.")
     else:
         # Add a dummy dimension
@@ -109,10 +109,28 @@ def _inference(net, inp, image_size):
     image = torch.from_numpy(image).permute(0, 3, 1, 2)
     # Normalize
     image = torch.div(image, torch.Tensor([255.0]))
+
     # Enhance
     logger.debug("Enhancing image...")
-    ei_1, ei, A = net(image)
-    ei = ei.detach()
+    if image.size(0) > csize:
+        # Get batch numbers
+        cnos = [0]
+        while cnos[-1] + csize < image.size(0):
+            cnos.append(cnos[-1] + csize)
+        cnos.append(image.size(0))
+
+        # Cycle through batches of 8
+        ei = []
+        for i in range(len(cnos)-1):
+            logger.debug(f"Enhancing image[{cnos[i]}:{cnos[i+1]}]")
+            _, _ei, _ = net(image[cnos[i]:cnos[i+1]])
+            ei.append(_ei.detach())
+        ei = torch.cat(ei, dim=0)
+
+    else:
+        _, ei, _ = net(image)
+        ei = ei.detach()
+
     # Unnormalize
     # TODO See when this is required/not
     # ei = torch.clamp(ei * torch.Tensor([255]), 0, 255)
@@ -122,13 +140,13 @@ def _inference(net, inp, image_size):
         result = ei.squeeze(0)
     else:
         result = reconstruct(ei.permute(0, 2, 3, 1), 
-                             image_size, 1/8.0, original_shape, 
+                             patch_size, 1/8.0, original_shape, 
                              X_points, Y_points).squeeze(0).permute(2, 0, 1)
 
     return result, image_path
 
 
-def inference(weights, images, image_size, outdir):
+def inference(weights, images, patch_size, cycle_size, outdir):
     if type(images) != list:
         images = [images]
 
@@ -144,7 +162,7 @@ def inference(weights, images, image_size, outdir):
 
     results = []
     for inp in images:
-        results.append(_inference(net, inp, image_size))
+        results.append(_inference(net, inp, patch_size, cycle_size))
 
     if outdir is not None:
         for (ei, image_path) in results:
@@ -158,9 +176,11 @@ def inference(weights, images, image_size, outdir):
 
 
 if __name__ == "__main__":
+    initLogger()
     parser = argparse.ArgumentParser()
     parser.add_argument("-w", "--weights", required=True)
-    parser.add_argument("-s", "--size", type=int, default=256)
+    parser.add_argument("-s", "--size", type=int, default=128, help="Patch size") 
+    parser.add_argument("-c", "--cycle", type=int, default=4, help="Cycle size")
     parser.add_argument("-i", "--images", nargs='+', required=True)
     parser.add_argument("-o", "--outdir", default="./data/output/")
     parser.add_argument("-v", "--verbose", dest="verbose", action="store_true")
@@ -169,5 +189,5 @@ if __name__ == "__main__":
     if not args.verbose:
         logger.setLevel(logging.INFO)
 
-    res = inference(args.weights, args.images, args.size, args.outdir)
+    res = inference(args.weights, args.images, args.size, args.cycle, args.outdir)
     del res
