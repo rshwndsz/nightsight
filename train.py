@@ -20,7 +20,7 @@ from pytorch_lightning.loggers.neptune import NeptuneLogger
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
-from nightsight.log import logger
+from nightsight.log import initLogger 
 from nightsight import utils
 from nightsight import loss
 from nightsight import data
@@ -189,6 +189,8 @@ def post_train(trainer):
 
 if __name__ == "__main__":
     # Setup
+    initLogger()
+    logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     pl.seed_everything(CONSTANTS['SEED'])
 
